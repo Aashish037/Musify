@@ -2,9 +2,10 @@ import './global.css' // Import global styles for Nativewind
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
 import HomeScreen from './src/screens/HomeScreen'
-import ProfileScreen from './src/screens/ProfileScreen'
+import LibraryScreen from './src/screens/LibraryScreen'
 import SearchScreen from './src/screens/SearchScreen'
 import Icon from 'react-native-vector-icons/FontAwesome5';
+// import Icon1 from 'react-native-vector-icons/Lucide';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 
@@ -14,8 +15,8 @@ const HomeTabBarIcon = ({ color, size }: { color: string; size: number }) => (
   <Icon name="home" color={color} size={size} />
 );
 
-const ProfileTabBarIcon = ({ color, size }: { color: string; size: number }) => (
-  <Icon name="user" color={color} size={size} />
+const LibraryTabBarIcon = ({ color, size }: { color: string; size: number }) => (
+  <Icon name="book" color={color} size={size} />
 );
 
 const SearchTabBarIcon = ({ color, size }: { color: string; size: number }) => (
@@ -28,11 +29,15 @@ function TabNavigation() {
       screenOptions={{
         headerShown: false, // Hide the header for all screens
         tabBarStyle: {
-          backgroundColor: '#f8f9fa', // Light background color for the tab bar
+          backgroundColor: '#151312', // Dark background color for the tab bar (secondary color)
           borderTopWidth: 0, // Remove the top border
         },
-        tabBarActiveTintColor: '#007bff', // Active tab color
-        tabBarInactiveTintColor: '#6c757d', // Inactive tab color
+        tabBarActiveTintColor: '#AB8BFF', // Active tab color (accent)
+        tabBarInactiveTintColor: '#9CA4AB', // Inactive tab color (light-300)
+        tabBarLabelStyle: {
+          fontFamily: 'SpaceMono-Regular',
+          fontSize: 12,
+        },
       }}
     >
       <Tab.Screen 
@@ -52,11 +57,11 @@ function TabNavigation() {
           }}
         />
       <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen}
+        name="Library" 
+        component={LibraryScreen}
         options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ProfileTabBarIcon
+          tabBarLabel: 'Library',
+          tabBarIcon: LibraryTabBarIcon
         }}
       />
     </Tab.Navigator>

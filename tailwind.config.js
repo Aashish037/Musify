@@ -21,6 +21,7 @@ module.exports = {
       },
       fontFamily: {
         'space-mono': ['SpaceMono-Regular'],
+        'space-mono-bold': ['SpaceMono-Bold'],
       },
     },
   },

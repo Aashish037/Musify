@@ -12,7 +12,8 @@ interface Music {
   isFavorite: boolean; // Indicates if the song is marked as a favorite by the user
   movieName?: string; // Optional: Name of the movie if the song is from a soundtrack
   duration: number; // Duration of the song in seconds
-  albumArtUrl: string; // URL to the album cover art
+  // albumArtUrl: string; // URL to the album cover art
+  icon?: string; // Optional: URL or path to the icon representing the song
   audioUrl: string; // URL to the audio file of the song
   genre?: string; // Optional: Genre of the music (e.g., Pop, Rock, Classical)
   releaseDate?: string; // Optional: Release date of the song (e.g., "YYYY-MM-DD")

@@ -1,62 +1,43 @@
-import { View, Text, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 import RecentSongsList from '../components/RecentSongsSection';
 import FlatCards from '../components/FlatCards';
 import { recentSongs } from '../data/musicData';
-import MusicControl from '../components/MusicControl';
+import { useNavigation } from '@react-navigation/native';
 
-const HomeScreen = () => {
+interface HomeScreenProps {
+  onSongPress: (song: { id: string }) => void;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ onSongPress }) => {
+  const { user } = useAuth();
   const navigation = useNavigation();
-  // State for mini player
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, _setProgress] = useState(0.3); // 30% progress
-  const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
-    null,
-  );
+  const guestImage = require('../assests/icons/guest.jpeg');
 
-  // Handlers
-  const handlePlayPause = () => setIsPlaying(prev => !prev);
-  const handleNext = () => {
-    if (currentTrackIndex !== null) {
-      const nextIndex = (currentTrackIndex + 1) % recentSongs.length;
-      setCurrentTrackIndex(nextIndex);
-      setIsPlaying(true);
-    }
-  };
-  const handlePrev = () => {
-    if (currentTrackIndex !== null) {
-      const prevIndex =
-        (currentTrackIndex - 1 + recentSongs.length) % recentSongs.length;
-      setCurrentTrackIndex(prevIndex);
-      setIsPlaying(true);
-    }
-  };
-  const handleSongPress = (song: { id: string }) => {
-    const idx = recentSongs.findIndex(s => s.id === song.id);
-    setCurrentTrackIndex(idx);
-    setIsPlaying(true);
-    (navigation as any).navigate('NowPlaying', { song });
-  };
-  const currentTrack =
-    currentTrackIndex !== null ? recentSongs[currentTrackIndex] : null;
-
-  console.log('HomeScreen rendered');
   return (
     <SafeAreaView className="flex-1 bg-primary">
-      <View className="h-20 items-start justify-center px-4">
-        <Text className="text-2xl font-bold text-accent font-space-mono-bold">
-          Musify
-        </Text>
+      <View className="flex-row items-center justify-between h-20 px-4">
+        <View>
+          <Text className="text-2xl font-bold text-accent font-space-mono-bold">
+            Musify
+          </Text>
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile' as never)}>
+          <Image
+            source={user?.profilePictureUrl ? { uri: user.profilePictureUrl } : guestImage}
+            className="w-12 h-12 rounded-full border-2 border-yellow-300"
+          />
+        </TouchableOpacity>
       </View>
 
       <View className="ml-4 mt-2 mb-3">
         <Text className="text-yellow-300 text-2xl font-bold font-space-mono-bold">
-          Hi There,{' '}
+          Halo,{' '}
         </Text>
         <Text className="text-white text-xl font-semibold font-space-mono-bold">
-          Aashish{' '}
+          {user?.name || user?.email?.split('@')[0] || 'Guest'}{' '}
         </Text>
       </View>
 
@@ -73,27 +54,7 @@ const HomeScreen = () => {
 
       {/* Featured Section */}
       {/* Recent Songs Section */}
-      <RecentSongsList songs={recentSongs} onSongPress={handleSongPress} />
-
-      {/* Mini Player Floating Above Tab Bar */}
-      <MusicControl
-        visible={currentTrack !== null}
-        track={
-          currentTrack
-            ? {
-                icon: currentTrack.icon,
-                title: currentTrack.title,
-                artist: currentTrack.artist,
-                album: currentTrack.album,
-              }
-            : undefined
-        }
-        isPlaying={isPlaying}
-        onPlayPause={handlePlayPause}
-        onNext={handleNext}
-        onPrev={handlePrev}
-        progress={progress}
-      />
+      <RecentSongsList songs={recentSongs} onSongPress={onSongPress} />
     </SafeAreaView>
   );
 };

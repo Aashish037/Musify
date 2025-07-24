@@ -11,6 +11,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import Slider from '@react-native-community/slider';
 
 // Icon imports
 import heart from '../assests/icons/heart.png';
@@ -34,6 +35,7 @@ const NowPlayingScreen = () => {
   const [isFavorite, setIsFavorite] = useState(song?.isFavorite || false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0);
+  const [progress, setProgress] = useState(0.3); // 0 to 1
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -128,15 +130,7 @@ const NowPlayingScreen = () => {
 
         {/* CD (Album Art) */}
         <View className="flex-1 items-center justify-center">
-          <View
-            style={{
-              shadowColor: '#000',
-              shadowOpacity: 0.25,
-              shadowRadius: 40,
-              shadowOffset: { width: 0, height: 10 },
-              elevation: 20,
-            }}
-          >
+          <View className="shadow-lg shadow-black/25">
             <Animated.Image
               source={song?.icon}
               className="w-72 h-72 rounded-full"
@@ -163,18 +157,22 @@ const NowPlayingScreen = () => {
           <View className="mb-2">
             <View className="flex-row justify-between mb-1">
               <Text className="text-gray-200 text-xs font-space-mono">
-                {formatTime(0)}
+                {formatTime(Math.floor(progress * duration))}
               </Text>
               <Text className="text-gray-200 text-xs font-space-mono">
                 {formatTime(duration)}
               </Text>
             </View>
-            <View className="h-2 bg-white/30 rounded-full w-full overflow-hidden">
-              <View
-                className="h-2 rounded-full"
-                style={{ backgroundColor: '#fff', width: `30%` }} // Example progress, replace with real value
-              />
-            </View>
+            <Slider
+              className="w-full h-5 bg-white/30 rounded-full"
+              minimumValue={0}
+              maximumValue={1}
+              value={progress}
+              onValueChange={setProgress}
+              minimumTrackTintColor="#f87171"
+              maximumTrackTintColor="#888"
+              thumbTintColor="#fff"
+            />
           </View>
 
           {/* Controls */}
@@ -203,13 +201,7 @@ const NowPlayingScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setIsPlaying(!isPlaying)}
-              className="mx-4 bg-white rounded-full p-6 shadow-lg"
-              style={{
-                shadowColor: '#fff',
-                shadowOpacity: 0.25,
-                shadowRadius: 20,
-                elevation: 10,
-              }}
+              className="mx-4 bg-white rounded-full p-6 shadow-lg shadow-white/25"
             >
               <Image
                 source={isPlaying ? pauseIcon : playIcon}

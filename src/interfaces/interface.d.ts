@@ -50,10 +50,10 @@ interface MusicDetails {
   lyrics?: string; // Optional: Full lyrics of the song
   label?: string; // Optional: Record label
   movieName?: string; // Optional: Name of the movie if the song is from a soundtrack
-  playCount: number; // Number of times the song has been played
-  likes: number; // Number of likes the song has received
-  isFavorite: boolean; // Indicates if the song is marked as a favorite by the user
-  releaseYear: number; // Year the song was released
+  playCount?: number; // Number of times the song has been played
+  likes?: number; // Number of likes the song has received
+  isFavorite?: boolean; // Indicates if the song is marked as a favorite by the user
+  releaseYear?: number; // Year the song was released
   relatedSongs?: Music[]; // Optional: List of related songs (e.g., similar tracks or songs by the same artist)
   comments?: { user: string; comment: string; timestamp: string }[]; // Optional: List of user comments on the song
   isAvailableOffline?: boolean; // Optional: Indicates if the song is available for offline listening

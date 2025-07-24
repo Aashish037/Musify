@@ -1,24 +1,38 @@
-
-import './global.css' // Import global styles for Nativewind
+import './global.css'; // Import global styles for Nativewind
 import React from 'react';
-import { Image, ImageSourcePropType, StyleProp, ImageStyle } from 'react-native'; // Import Image and related types
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { NavigationContainer } from '@react-navigation/native'
-import HomeScreen from './src/screens/HomeScreen'
-import LibraryScreen from './src/screens/LibraryScreen'
-import SearchScreen from './src/screens/SearchScreen'
-// import Icon from 'react-native-vector-icons/FontAwesome5'; // REMOVE THIS LINE
-// import Icon1 from 'react-native-vector-icons/Lucide';
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import NowPlayingScreen from './src/screens/NowPlayingScreen'
+import {
+  Image,
+  ImageSourcePropType,
+  StyleProp,
+  ImageStyle,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+} from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// --- Import your screens ---
+import HomeScreen from './src/screens/HomeScreen';
+import LibraryScreen from './src/screens/LibraryScreen';
+import SearchScreen from './src/screens/SearchScreen';
+import NowPlayingScreen from './src/screens/NowPlayingScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
+
+// --- Import your Auth related components/hooks ---
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import AuthStack from './src/navigation/AuthStack';
+import MusicControl from './src/components/MusicControl';
+import { recentSongs } from './src/data/musicData'; // or wherever your songs are
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // --- Import your custom icon assets ---
 // IMPORTANT: Adjust these paths to your actual file locations and names.
-// Assuming you have 'home_active.png', 'home_inactive.png', etc., in 'assets/icons/'
 import HomeActiveIcon from './src/assests/icons/home_active.png';
 import HomeInactiveIcon from './src/assests/icons/home_inactive.png';
 import LibraryActiveIcon from './src/assests/icons/library_active.png';
@@ -27,10 +41,9 @@ import SearchActiveIcon from './src/assests/icons/search_active.png';
 import SearchInactiveIcon from './src/assests/icons/search_inactive.png';
 
 // --- Generic Custom Tab Bar Icon Component ---
-// This component will handle rendering the correct image based on the 'focused' state
 type CustomIconProps = {
   focused: boolean;
-  _color: string; // This color might be used for tinting if your images are single-color
+  _color: string;
   size: number;
   activeIconSource: ImageSourcePropType;
   inactiveIconSource: ImageSourcePropType;
@@ -38,29 +51,30 @@ type CustomIconProps = {
 
 const CustomTabBarImage = ({
   focused,
-  _color, // Prefix with underscore to indicate it's intentionally unused
+  _color,
   size,
   activeIconSource,
   inactiveIconSource,
 }: CustomIconProps) => {
   const iconSource = focused ? activeIconSource : inactiveIconSource;
-
-  // You can apply tintColor if your image assets are single-color (e.g., SVG or grayscale PNGs)
-  // and you want them to be colored by the 'color' prop from React Navigation.
-  // If your image assets are already colored PNGs/JPGs, remove or comment out tintColor.
   const imageStyle: StyleProp<ImageStyle> = {
     width: size,
     height: size,
     // tintColor: color, // Uncomment this line if you want to tint your icons dynamically
   };
-
   return <Image source={iconSource} style={imageStyle} resizeMode="contain" />;
 };
 
-
 // --- Specific Tab Bar Icon Components using CustomTabBarImage ---
-// These components now use your image assets instead of FontAwesome icons
-const HomeTabBarIcon = ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+const HomeTabBarIcon = ({
+  color,
+  size,
+  focused,
+}: {
+  color: string;
+  size: number;
+  focused: boolean;
+}) => (
   <CustomTabBarImage
     focused={focused}
     _color={color}
@@ -70,7 +84,15 @@ const HomeTabBarIcon = ({ color, size, focused }: { color: string; size: number;
   />
 );
 
-const LibraryTabBarIcon = ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+const LibraryTabBarIcon = ({
+  color,
+  size,
+  focused,
+}: {
+  color: string;
+  size: number;
+  focused: boolean;
+}) => (
   <CustomTabBarImage
     focused={focused}
     _color={color}
@@ -80,7 +102,15 @@ const LibraryTabBarIcon = ({ color, size, focused }: { color: string; size: numb
   />
 );
 
-const SearchTabBarIcon = ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+const SearchTabBarIcon = ({
+  color,
+  size,
+  focused,
+}: {
+  color: string;
+  size: number;
+  focused: boolean;
+}) => (
   <CustomTabBarImage
     focused={focused}
     _color={color}
@@ -91,7 +121,12 @@ const SearchTabBarIcon = ({ color, size, focused }: { color: string; size: numbe
 );
 
 // Tab icon renderer function
-const getTabBarIcon = (route: any, focused: boolean, color: string, size: number) => {
+const getTabBarIcon = (
+  route: any,
+  focused: boolean,
+  color: string,
+  size: number,
+) => {
   if (route.name === 'Home') {
     return <HomeTabBarIcon focused={focused} color={color} size={size} />;
   } else if (route.name === 'Search') {
@@ -102,66 +137,155 @@ const getTabBarIcon = (route: any, focused: boolean, color: string, size: number
   return null;
 };
 
+// TabNavigation component (representing the "AppStack" content)
 function TabNavigation() {
+  // Move these states up from HomeScreen
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0.3); // 0 to 1
+  const [currentTrackIndex, setCurrentTrackIndex] = React.useState<
+    number | null
+  >(null);
+
+  // Handlers
+  const handlePlayPause = () => setIsPlaying(prev => !prev);
+  const handleNext = () => {
+    if (currentTrackIndex !== null) {
+      const nextIndex = (currentTrackIndex + 1) % recentSongs.length;
+      setCurrentTrackIndex(nextIndex);
+      setIsPlaying(true);
+    }
+  };
+  const handlePrev = () => {
+    if (currentTrackIndex !== null) {
+      const prevIndex =
+        (currentTrackIndex - 1 + recentSongs.length) % recentSongs.length;
+      setCurrentTrackIndex(prevIndex);
+      setIsPlaying(true);
+    }
+  };
+
+  // This function can be passed to RecentSongsList or any component to play a song
+  const handleSongPress = (song: { id: string }) => {
+    const idx = recentSongs.findIndex(s => s.id === song.id);
+    setCurrentTrackIndex(idx);
+    setIsPlaying(true);
+  };
+
+  const currentTrack =
+    currentTrackIndex !== null ? recentSongs[currentTrackIndex] : null;
+
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false, // Hide the header for all screens
-        tabBarStyle: {
-          backgroundColor: '#151312', // Dark background color for the tab bar (secondary color)
-          borderTopWidth: 0, // Remove the top border
-        },
-        tabBarActiveTintColor: '#AB8BFF', // Active tab color (accent)
-        tabBarInactiveTintColor: '#9CA4AB', // Inactive tab color (light-300)
-        tabBarLabelStyle: {
-          fontFamily: 'SpaceMono-Regular',
-          fontSize: 12,
-        },
-        // Use the external function for tab bar icons
-        tabBarIcon: ({ focused, color, size }) => 
-          getTabBarIcon(route, focused, color, size),
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'Home',
-          // tabBarIcon is now handled by screenOptions above
-        }}
+    <View className="flex-1">
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: '#151312',
+            borderTopWidth: 0,
+          },
+          tabBarActiveTintColor: '#AB8BFF',
+          tabBarInactiveTintColor: '#9CA4AB',
+          tabBarLabelStyle: {
+            fontFamily: 'SpaceMono-Regular',
+            fontSize: 12,
+          },
+          tabBarIcon: ({ focused, color, size }) =>
+            getTabBarIcon(route, focused, color, size),
+        })}
+      >
+        {/* Pass handleSongPress to HomeScreen as a prop */}
+        <Tab.Screen
+          name="Home"
+          options={{ tabBarLabel: 'Home' }}
+          children={() => <HomeScreen onSongPress={handleSongPress} />}
+        />
+        <Tab.Screen
+          name="Search"
+          options={{ tabBarLabel: 'Search' }}
+          children={() => <SearchScreen onSongPress={handleSongPress} />}
+        />
+        <Tab.Screen
+          name="Library"
+          options={{ tabBarLabel: 'Your Library' }}
+          children={() => <LibraryScreen onSongPress={handleSongPress} />}
+        />
+      </Tab.Navigator>
+      <MusicControl
+        visible={currentTrack !== null}
+        track={
+          currentTrack
+            ? {
+                icon: currentTrack.icon,
+                title: currentTrack.title,
+                artist: currentTrack.artist,
+                album: currentTrack.album,
+              }
+            : undefined
+        }
+        isPlaying={isPlaying}
+        onPlayPause={handlePlayPause}
+        onNext={handleNext}
+        onPrev={handlePrev}
+        progress={progress}
+        setProgress={setProgress}
       />
-      <Tab.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{
-          tabBarLabel: 'Search',
-          // tabBarIcon is now handled by screenOptions above
-        }}
-      />
-      <Tab.Screen
-        name="Library"
-        component={LibraryScreen}
-        options={{
-          tabBarLabel: 'Your Library',
-          // tabBarIcon is now handled by screenOptions above
-        }}
-      />
-    </Tab.Navigator>
+    </View>
   );
 }
 
+// --- NEW: RootNavigator Component to handle conditional rendering ---
+const RootNavigator = () => {
+  const { user, loading } = useAuth(); // Get user and loading state from AuthContext
 
-const App = () => {
+  // 1. Show a loading indicator while the authentication status is being checked
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#AB8BFF" />{' '}
+        {/* Use your accent color */}
+      </View>
+    );
+  }
+
+  // 2. Once loading is complete, conditionally render the appropriate stack
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
+    <NavigationContainer>
+      {/* If a user is logged in, show the main app content (TabNavigation) */}
+      {user ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="TabNavigation" component={TabNavigation} />
           <Stack.Screen name="NowPlaying" component={NowPlayingScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          {/* Add any other screens that are part of the main app but not in the bottom tabs */}
         </Stack.Navigator>
-      </NavigationContainer>
+      ) : (
+        // If no user is logged in, show the authentication stack
+        <AuthStack />
+      )}
+    </NavigationContainer>
+  );
+};
+
+// --- Main App Component ---
+const App = () => {
+  return (
+    <SafeAreaProvider>
+      {/* Wrap the entire application with AuthProvider */}
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
     </SafeAreaProvider>
-  )
-}
+  );
+};
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#121212', // A dark background for the loading screen
+  },
+});
 
 export default App;

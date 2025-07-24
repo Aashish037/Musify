@@ -103,14 +103,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setError(null);
     try {
       const userCredential = await signup(email, password, name);
+
+      // Set displayName and photoURL
+      await userCredential.user.updateProfile({
+        displayName: name,
+        photoURL: '', // or a default avatar URL
+      });
+
       setUser({
         uid: userCredential.user.uid,
         email: userCredential.user.email || '',
-        name: userCredential.user.displayName || name,
-        profilePictureUrl: userCredential.user.photoURL || '',
+        name: name,
+        profilePictureUrl: '',
         createdAt: new Date(userCredential.user.metadata.creationTime || ''),
         updatedAt: new Date(userCredential.user.metadata.lastSignInTime || ''),
       });
+
+      // Create Firestore user doc after signup
+      await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .set({
+          name: name,
+          email: userCredential.user.email,
+          username: name.toLowerCase().replace(/\s/g, ''),
+          profilePictureUrl: '',
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        });
     } catch (err: unknown) {
       console.log('Sign Up error:', err);
       const errorMessage =

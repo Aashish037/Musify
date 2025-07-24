@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import BackHeader from '../components/BackButton';
 
 const ProfileScreen = () => {
   const { user, logout } = useAuth();
@@ -10,13 +11,11 @@ const ProfileScreen = () => {
 
   return (
     <View className="flex-1 bg-primary px-6 pt-10">
-      {/* Header with Settings */}
-      <View className="flex-row justify-between items-center mb-8">
-        <Text className="text-2xl font-bold text-white font-space-mono-bold">
-          My Profile
-        </Text>
+      <BackHeader title="My Profile" />
+      {/* Header right action (optional) */}
+      <View style={{ alignItems: 'flex-end', marginBottom: 8 }}>
         <TouchableOpacity>
-          <Text className="text-2xl text-accent">⚙️</Text>
+          <Text style={{ fontSize: 22, color: '#FF6F61' }}>⚙️</Text>
         </TouchableOpacity>
       </View>
       {/* Profile Image and Info */}

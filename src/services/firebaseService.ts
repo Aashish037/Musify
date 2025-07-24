@@ -42,6 +42,42 @@ export const updateProfilePictureUrl = async (uid: string, url: string) => {
   });
 };
 
+// Update user profile (name, email, username, profilePictureUrl)
+export const updateUserProfile = async (
+  uid: string,
+  {
+    name,
+    email,
+    username,
+    profilePictureUrl,
+  }: {
+    name?: string;
+    email?: string;
+    username?: string;
+    profilePictureUrl?: string;
+  },
+) => {
+  // Update Firestore user document
+  const updateData: any = {};
+  if (name !== undefined) updateData.name = name;
+  if (email !== undefined) updateData.email = email;
+  if (username !== undefined) updateData.username = username;
+  if (profilePictureUrl !== undefined)
+    updateData.profilePictureUrl = profilePictureUrl;
+  await firestore().collection('users').doc(uid).update(updateData);
+
+  // Update Firebase Auth profile if needed
+  const currentUser = auth().currentUser;
+  if (currentUser) {
+    if (name !== undefined && name !== currentUser.displayName) {
+      await currentUser.updateProfile({ displayName: name });
+    }
+    if (email !== undefined && email !== currentUser.email) {
+      await currentUser.updateEmail(email);
+    }
+  }
+};
+
 // Sign out
 export const signOut = () => {
   return auth().signOut();

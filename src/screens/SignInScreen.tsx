@@ -6,6 +6,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/types';
 import { useAuth } from '../context/AuthContext';
 import LinearGradient from 'react-native-linear-gradient';
+import BackHeader from '../components/BackButton';
 
 const SignInScreen = ({
   navigation,
@@ -43,6 +44,7 @@ const SignInScreen = ({
       className="flex-1 justify-center items-center"
     >
       <SafeAreaView className="flex-1 w-full justify-center items-center">
+        <BackHeader title="Sign In" />
         <View className="flex-1 w-full justify-center items-center">
           <Text className="text-4xl font-bold text-white mb-1 font-space-mono-bold text-center">
             Musify
@@ -51,9 +53,7 @@ const SignInScreen = ({
             Never Lost. Discover New Music.
           </Text>
           <View className="bg-black/60 rounded-3xl px-6 py-8 w-11/12 max-w-md items-center shadow-lg backdrop-blur-md">
-            <Text className="text-2xl font-bold text-white mb-4 font-space-mono-bold">
-              Sign In
-            </Text>
+            {/* Removed duplicate Sign In header, BackHeader is now used */}
             {error && (
               <Text className="text-red-600 text-base mb-2 text-center">
                 {error}

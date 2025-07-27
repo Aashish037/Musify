@@ -47,9 +47,9 @@ npx react-native run-ios
 
 ## 🧬 Tech Stack
 
-React Native – Core framework
-TypeScript – Type-safe development
-Tailwind CSS (via NativeWind) – Utility-first styling
-Firebase – Backend services (auth, database, etc.)
+React Native – Core framework <br>
+TypeScript – Type-safe development <br>
+Tailwind CSS (via NativeWind) – Utility-first styling <br>
+Firebase – Backend services (auth, database, etc.) <br>
 Jest – Unit testing
 

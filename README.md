@@ -17,26 +17,6 @@ Musify is a modern, cross-platform music streaming application built with **Reac
 
 ---
 
-## 📂 Project Structure
-
-aashish037-musify/
-│
-├── App.tsx # Entry point of the application
-├── src/ # Source code
-│ ├── components/ # Reusable UI components
-│ ├── data/ # Static or mock data
-│ ├── interfaces/ # TypeScript interfaces
-│ ├── screens/ # Screen components (Home, Search, etc.)
-│ ├── services/ # API, Firebase, and music player services
-│ └── types/ # Type declarations
-│
-├── android/ # Android-specific code
-├── ios/ # iOS-specific code
-├── tests/ # Jest test cases
-├── tailwind.config.js # Tailwind CSS configuration
-├── package.json # Project dependencies and scripts
-└── ... # Other configuration files
-
 
 ---
 

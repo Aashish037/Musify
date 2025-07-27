@@ -46,6 +46,7 @@ npx react-native run-android
 npx react-native run-ios
 
 ## 🧬 Tech Stack
+
 React Native – Core framework
 TypeScript – Type-safe development
 Tailwind CSS (via NativeWind) – Utility-first styling
